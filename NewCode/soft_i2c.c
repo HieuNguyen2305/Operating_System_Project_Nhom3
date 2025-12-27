@@ -6,8 +6,8 @@
 
 /* ================= CẤU HÌNH ================= */
 #define SIMULATION_MODE 0  // 0: Chạy thật trên Pi, 1: Giả lập trên PC
-#define SDA_PIN 2          // GPIO 2 (Pin 3 vật lý)
-#define SCL_PIN 3          // GPIO 3 (Pin 5 vật lý)
+#define SDA_PIN 17          // GPIO 2 (Pin 3 vật lý)
+#define SCL_PIN 27          // GPIO 3 (Pin 5 vật lý)
 #define I2C_DELAY_US 5     // Tốc độ ~100kHz (Chuẩn)
 
 MODULE_LICENSE("GPL");
