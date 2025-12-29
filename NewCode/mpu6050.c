@@ -30,7 +30,6 @@ struct mpu_data {
     short gyro_x; short gyro_y; short gyro_z;
 };
 
-/* Hàm phụ trợ: Ghi 1 byte vào 1 thanh ghi của MPU6050 */
 static void mpu_write_reg(u8 reg, u8 value) {
     my_i2c_start();
     my_i2c_write_byte(MPU_ADDR << 1 | 0); // Gửi địa chỉ + Bit Write (0)
@@ -52,21 +51,15 @@ static ssize_t driver_read(struct file *file, char __user *user_buf, size_t coun
     u8 buf[14];
     int i;
 
-    /* QUY TRÌNH ĐỌC CHUẨN I2C: */
-    
-    /* BƯỚC 1: Báo cho cảm biến biết muốn đọc từ thanh ghi 0x3B trở đi */
     my_i2c_start();
     my_i2c_write_byte(MPU_ADDR << 1 | 0); // Write Mode
     my_i2c_wait_ack();
     my_i2c_write_byte(ACCEL_XOUT_H);      // Trỏ con trỏ vào thanh ghi 0x3B
     my_i2c_wait_ack();
-    
-    /* BƯỚC 2: Khởi động lại (Repeat Start) để chuyển sang chế độ Đọc */
+
     my_i2c_start();
     my_i2c_write_byte(MPU_ADDR << 1 | 1); // Read Mode (Bit cuối là 1)
     my_i2c_wait_ack();
-
-    /* BƯỚC 3: Đọc liên tiếp 14 byte */
     for(i=0; i<14; i++) {
         // Nếu chưa phải byte cuối -> Gửi ACK (1) để đọc tiếp
         // Nếu là byte cuối (i=13) -> Gửi NACK (0) để dừng
@@ -75,7 +68,6 @@ static ssize_t driver_read(struct file *file, char __user *user_buf, size_t coun
     
     my_i2c_stop(); // Kết thúc giao tiếp
 
-    /* --- GÁN DỮ LIỆU --- */
     data.accel_x = (buf[0] << 8) | buf[1];
     data.accel_y = (buf[2] << 8) | buf[3];
     data.accel_z = (buf[4] << 8) | buf[5];
@@ -105,8 +97,6 @@ static int __init mpu_init(void) {
     device_create(my_class, NULL, my_dev_num, NULL, "mpu6050");
     cdev_init(&my_cdev, &fops);
     cdev_add(&my_cdev, my_dev_num, 1);
-    
-    /* QUAN TRỌNG: Đánh thức MPU6050 khỏi chế độ ngủ */
     // Ghi 0x00 vào thanh ghi 0x6B (PWR_MGMT_1)
     mpu_write_reg(PWR_MGMT_1, 0x00);
     pr_info("MPU6050: Init & Waked Up!\n");
